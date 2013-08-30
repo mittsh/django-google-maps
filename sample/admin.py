@@ -8,9 +8,9 @@ from django_google_maps.fields import AddressField, GeoLocationField
 from sample import models
 
 class SampleModelAdmin(admin.ModelAdmin):
-    formfield_overrides = {
-        AddressField: {'widget': GoogleMapsAddressWidget},
-        GeoLocationField: {'widget': TextInput(attrs={'readonly': 'readonly'})},
-    }
+	formfield_overrides = {
+		AddressField: {'widget': GoogleMapsAddressWidget},
+		GeoLocationField: {'widget': TextInput(attrs={'readonly': 'readonly'})},
+	}
 
 admin.site.register(models.SampleModel, SampleModelAdmin)

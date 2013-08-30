@@ -13,23 +13,23 @@ USAGE:
 - include the `django_google_maps` app in your `settings.py`
 - create a model that has both an address field and geolocation field
   <pre><code>
-    from django.db import models
-    from django_google_maps import fields as map_fields
-    
-    class Rental(models.Model):
-        address = map_fields.AddressField(max_length=200)
-        geolocation = map_fields.GeoLocationField(max_length=100)    
+	from django.db import models
+	from django_google_maps import fields as map_fields
+	
+	class Rental(models.Model):
+		address = map_fields.AddressField(max_length=200)
+		geolocation = map_fields.GeoLocationField(max_length=100)	
   </code></pre>
 - in the `admin.py` include the following as a formfield_override
   <pre><code>
-      from django.contrib import admin
-      from django_google_maps import widgets as map_widgets
-      from django_google_maps import fields as map_fields
-      
-      class RentalAdmin(admin.ModelAdmin):
-          formfield_overrides = {
-              map_fields.AddressField: {'widget': map_widgets.GoogleMapsAddressWidget},    
-          }
+	  from django.contrib import admin
+	  from django_google_maps import widgets as map_widgets
+	  from django_google_maps import fields as map_fields
+	  
+	  class RentalAdmin(admin.ModelAdmin):
+		  formfield_overrides = {
+			  map_fields.AddressField: {'widget': map_widgets.GoogleMapsAddressWidget},	
+		  }
   </code></pre>
   
 That should be all you need to get started. If you're not using Django 1.3

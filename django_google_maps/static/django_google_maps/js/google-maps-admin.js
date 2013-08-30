@@ -23,101 +23,111 @@ This script expects:
 
 function googleMapAdmin() {
 
-    var geocoder = new google.maps.Geocoder();
-    var map;
-    var marker;
+	var geocoder = new google.maps.Geocoder();
+	var map;
+	var marker;
 
-    var self = {
-        initialize: function() {
-            var lat = 0;
-            var lng = 0;
-            var zoom = 2;
-            // set up initial map to be world view. also, add change
-            // event so changing address will update the map
-            existinglocation = self.getExistingLocation();
-            if (existinglocation) {
-                lat = existinglocation[0];
-                lng = existinglocation[1];
-                zoom = 18;
-            }
+	var self = {
+		initialize: function() {
+			var mapCanvas = document.getElementById("map_canvas");
+			
+			var lat = 0;
+			var lng = 0;
+			var zoom = 2;
+			// set up initial map to be world view. also, add change
+			// event so changing address will update the map
+			existinglocation = self.getExistingLocation();
+			if (existinglocation) {
+				lat = existinglocation[0];
+				lng = existinglocation[1];
+				zoom = 18;
+			}
+			
+			var mapType = google.maps.MapTypeId.ROADMAP;
+			if ($(mapCanvas).attr('data-map-type') == 'hybrid')
+				mapType = google.maps.MapTypeId.HYBRID;
+			else if ($(mapCanvas).attr('data-map-type') == 'satellite')
+				mapType = google.maps.MapTypeId.SATELLITE;
+			else if ($(mapCanvas).attr('data-map-type') == 'satellite')
+				mapType = google.maps.MapTypeId.SATELLITE;
 
-            var latlng = new google.maps.LatLng(lat,lng);
-            var myOptions = {
-              zoom: zoom,
-              center: latlng,
-              mapTypeId: google.maps.MapTypeId.HYBRID
-            };
-            map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-            if (existinglocation) {
-                self.setMarker(latlng);
-            }
+			var latlng = new google.maps.LatLng(lat,lng);
+			var myOptions = {
+			  zoom: zoom,
+			  center: latlng,
+			  mapTypeId: $(mapCanvas).attr('data-map-type') == 'hybrid' ? google.maps.MapTypeId.HYBRID : google.maps.MapTypeId.
+			};
+			map = new google.maps.Map(mapCanvas, myOptions);
+			if (existinglocation) {
+				self.setMarker(latlng);
+			}
 
-            $("#id_address").change(function() {self.codeAddress();});
-        },
+			$("#id_address").change(function() {self.codeAddress();});
+		},
 
-        getExistingLocation: function() {
-            var geolocation = $("#id_geolocation").val();
-            if (geolocation) {
-                return geolocation.split(',');
-            }
-        },
+		getExistingLocation: function() {
+			var geolocation = $("#id_geolocation").val();
+			if (geolocation) {
+				return geolocation.split(',');
+			}
+		},
 
-        codeAddress: function() {
-            var address = $("#id_address").val();
-            geocoder.geocode({'address': address}, function(results, status) {
-                if (status == google.maps.GeocoderStatus.OK) {
-                    var latlng = results[0].geometry.location;
-                    map.setCenter(latlng);
-                    map.setZoom(18);
+		codeAddress: function() {
+			var address = $("#id_address").val();
+			geocoder.geocode({'address': address}, function(results, status) {
+				if (status == google.maps.GeocoderStatus.OK) {
+					var latlng = results[0].geometry.location;
+					map.setCenter(latlng);
+					map.setZoom(18);
 
-                    self.setMarker(latlng);
-                    self.updateGeolocation(latlng);
-                } else {
-                    alert("Geocode was not successful for the following reason: " + status);
-                }
-            });
-        },
+					self.setMarker(latlng);
+					self.updateGeolocation(latlng);
+				} else {
+					alert("Geocode was not successful for the following reason: " + status);
+				}
+			});
+		},
 
-        setMarker: function(latlng) {
-            if (marker) {
-                self.updateMarker(latlng);
-            } else {
-                self.addMarker({'latlng': latlng, 'draggable': true});
-            }
-        },
+		setMarker: function(latlng) {
+			if (marker) {
+				self.updateMarker(latlng);
+			} else {
+				self.addMarker({'latlng': latlng, 'draggable': true});
+			}
+		},
 
-        addMarker: function(Options) {
-            marker = new google.maps.Marker({
-                map: map,
-                position: Options.latlng
-            });
+		addMarker: function(Options) {
+			marker = new google.maps.Marker({
+				map: map,
+				position: Options.latlng
+			});
 
-            var draggable = Options.draggable || false;
-            if (draggable) {
-                self.addMarkerDrag(marker);
-            }
-        },
+			var draggable = Options.draggable || false;
+			if (draggable) {
+				self.addMarkerDrag(marker);
+			}
+		},
 
-        addMarkerDrag: function() {
-            marker.setDraggable(true);
-            google.maps.event.addListener(marker, 'dragend', function(new_location) {
-                self.updateGeolocation(new_location.latLng);
-            });
-        },
+		addMarkerDrag: function() {
+			marker.setDraggable(true);
+			google.maps.event.addListener(marker, 'dragend', function(new_location) {
+				self.updateGeolocation(new_location.latLng);
+			});
+		},
 
-        updateMarker: function(latlng) {
-            marker.setPosition(latlng);
-        },
+		updateMarker: function(latlng) {
+			marker.setPosition(latlng);
+		},
 
-        updateGeolocation: function(latlng) {
-            $("#id_geolocation").val(latlng.lat() + "," + latlng.lng());
-        }
-    }
+		updateGeolocation: function(latlng) {
+			$("#id_geolocation").val(latlng.lat() + "," + latlng.lng());
+		}
+	}
 
-    return self;
+	return self;
 }
 
 $(document).ready(function() {
-    var googlemap = googleMapAdmin();
-    googlemap.initialize();
+	var googlemap = googleMapAdmin();
+	googlemap.initialize();
 });
