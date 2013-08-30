@@ -133,16 +133,6 @@ class GeoLocationField(models.CharField):
 	def value_to_string(self, obj):
 		value = self._get_val_from_obj(obj)
 		return self.get_prep_value(value)
-	
-	def formfield(self, **kwargs):
-		defaults = {
-			'max_length': self.max_length,
-			'form_class':GeoLocationFormField
-		}
-		defaults.update(kwargs)
-		c= super(GeoLocationField, self).formfield(**defaults)
-		print(c)
-		return c
 
 try:
 	from south.modelsinspector import add_introspection_rules
