@@ -18,7 +18,6 @@
 
 from django.db import models
 from django.core import exceptions
-from form import GeoLocationFormField
 
 __all__ = ('AddressField', 'GeoLocationField')
 
