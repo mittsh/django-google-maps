@@ -35,6 +35,8 @@ class GoogleMapsGeolocationWidget(widgets.TextInput):
 	enable_address_field = False
 	enable_click_to_pick = False
 	default_map_zoom = 8
+	address_field = None
+	autoupdates_address = None
 	
 	class Media:
 		css = {'all': (settings.STATIC_URL + 'django_google_maps/css/django-google-maps.less.min.css',),}
@@ -58,16 +60,17 @@ class GoogleMapsGeolocationWidget(widgets.TextInput):
 		kwargs = {
 			'final_attrs': flatatt(final_attrs),
 			'field_id': final_attrs['id'],
-			'enable_click_to_pick': str(self.enable_click_to_pick).lower(),
-			'address_field_id': final_attrs['id'] + '_address',
+			'enable_click_to_pick': str(bool(self.enable_click_to_pick)).lower(),
+			'address_field_id': 'id_' + self.address_field if self.address_field else final_attrs['id'] + '_address',
 			'address_field': '',
-			'default_map_zoom':self.default_map_zoom
+			'default_map_zoom':self.default_map_zoom,
+			'autoupdates_address': str(bool(not self.address_field if self.autoupdates_address == None else self.autoupdates_address)).lower()
 		}
 		
-		if self.enable_address_field:
+		if self.enable_address_field and self.address_field == None:
 			kwargs['address_field'] = '<div class="map_value_address"><label>Address</label><input id="{address_field_id}" type="text" /></div>'.format(**kwargs)
 		
-		return mark_safe(u'<input{final_attrs} />{address_field}<div class="map_canvas_wrapper"><div id="map_canvas" class="map_canvas" data-field-id="{field_id}" data-enable-click-to-pick="{enable_click_to_pick}" data-address-field-id="{address_field_id}" data-default-map-zoom="{default_map_zoom}"></div></div>'.format(**kwargs))
+		return mark_safe(u'<input{final_attrs} />{address_field}<div class="map_canvas_wrapper"><div id="map_canvas" class="map_canvas" data-field-id="{field_id}" data-enable-click-to-pick="{enable_click_to_pick}" data-address-field-id="{address_field_id}" data-default-map-zoom="{default_map_zoom}" data-autoupdates-address={autoupdates_address}></div></div>'.format(**kwargs))
 
 
 

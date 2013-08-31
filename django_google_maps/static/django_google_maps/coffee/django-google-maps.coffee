@@ -7,7 +7,7 @@ class GoogleMapsPicker
 		@geolocationAddressField = document.getElementById @mapCanvas.getAttribute 'data-address-field-id'
 		
 		enableClickToPick = (@mapCanvas.getAttribute 'data-enable-click-to-pick') == 'true'
-		isAddressFieldTruth = false
+		autoupdatesAddress = (@mapCanvas.getAttribute 'data-autoupdates-address') == 'true'
 		defaultMapZoom = parseInt (@mapCanvas.getAttribute 'data-default-map-zoom') or 8
 		
 		# Read the LatLng from input field
@@ -30,14 +30,19 @@ class GoogleMapsPicker
 			latLng = @latLngFromField()
 			@map.setCenter latLng
 			@marker.setPosition latLng
-			@reverseGeocodeToAddressField()
+			
+			if autoupdatesAddress
+				@reverseGeocodeToAddressField()
 		
 		# If click-to-pick is enabled, bind Map's 'click' event
 		if enableClickToPick
 			google.maps.event.addListener @map, 'click',  (event) =>
 				@marker.setPosition event.latLng
 				@latLngToField event.latLng
-				@reverseGeocodeToAddressField()
+				
+				# Auto updates the address
+				if autoupdatesAddress
+					@reverseGeocodeToAddressField()
 		
 		# Bind Marker's 'drag' event
 		google.maps.event.addListener @marker, 'drag',  (event) =>
@@ -59,13 +64,29 @@ class GoogleMapsPicker
 					@geocodeFromAddressField()
 					false
 			
-			# Bind Marker's 'dragend' event
-			google.maps.event.addListener @marker, 'dragend', (event) =>
-				@reverseGeocodeToAddressField()
+			# Bind Marker's 'dragend' event to reverse-geocode
+			if autoupdatesAddress
+				google.maps.event.addListener @marker, 'dragend', (event) =>
+					@reverseGeocodeToAddressField()
 		
-		# If address field is not truth, set it's value from reverse geocoding
-		if not isAddressFieldTruth
+		# Set address field value from reverse geocoding
+		if autoupdatesAddress
 			@reverseGeocodeToAddressField()
+		
+		# If not automatically updates the address, add an Update button
+		if not autoupdatesAddress
+			updateAddressButton = document.createElement 'input'
+			updateAddressButton.setAttribute 'value', 'Update address'
+			updateAddressButton.setAttribute 'type', 'submit'
+			updateAddressButton.setAttribute 'class', 'field_helper'
+			$(@geolocationAddressField).after updateAddressButton
+			$(updateAddressButton).click () =>
+				@reverseGeocodeToAddressField()
+				false
+		
+		# Make sure the address field has the class 'map_value_address'
+		# It might not be the case when using another field as address
+		$(@geolocationAddressField).parent().addClass 'map_value_address'
 
 	# Returns a LatLng object from the input field value
 	latLngFromField: () ->

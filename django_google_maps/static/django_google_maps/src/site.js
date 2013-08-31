@@ -4,13 +4,13 @@
 
   GoogleMapsPicker = (function() {
     function GoogleMapsPicker(mapCanvas) {
-      var defaultMapZoom, enableClickToPick, isAddressFieldTruth, latLng,
+      var autoupdatesAddress, defaultMapZoom, enableClickToPick, latLng, updateAddressButton,
         _this = this;
       this.mapCanvas = mapCanvas;
       this.geolocationField = document.getElementById(this.mapCanvas.getAttribute('data-field-id'));
       this.geolocationAddressField = document.getElementById(this.mapCanvas.getAttribute('data-address-field-id'));
       enableClickToPick = (this.mapCanvas.getAttribute('data-enable-click-to-pick')) === 'true';
-      isAddressFieldTruth = false;
+      autoupdatesAddress = (this.mapCanvas.getAttribute('data-autoupdates-address')) === 'true';
       defaultMapZoom = parseInt((this.mapCanvas.getAttribute('data-default-map-zoom')) || 8);
       latLng = this.latLngFromField();
       this.map = new google.maps.Map(this.mapCanvas, {
@@ -27,13 +27,17 @@
         latLng = _this.latLngFromField();
         _this.map.setCenter(latLng);
         _this.marker.setPosition(latLng);
-        return _this.reverseGeocodeToAddressField();
+        if (autoupdatesAddress) {
+          return _this.reverseGeocodeToAddressField();
+        }
       });
       if (enableClickToPick) {
         google.maps.event.addListener(this.map, 'click', function(event) {
           _this.marker.setPosition(event.latLng);
           _this.latLngToField(event.latLng);
-          return _this.reverseGeocodeToAddressField();
+          if (autoupdatesAddress) {
+            return _this.reverseGeocodeToAddressField();
+          }
         });
       }
       google.maps.event.addListener(this.marker, 'drag', function(event) {
@@ -50,13 +54,27 @@
             return false;
           }
         });
-        google.maps.event.addListener(this.marker, 'dragend', function(event) {
-          return _this.reverseGeocodeToAddressField();
-        });
+        if (autoupdatesAddress) {
+          google.maps.event.addListener(this.marker, 'dragend', function(event) {
+            return _this.reverseGeocodeToAddressField();
+          });
+        }
       }
-      if (!isAddressFieldTruth) {
+      if (autoupdatesAddress) {
         this.reverseGeocodeToAddressField();
       }
+      if (!autoupdatesAddress) {
+        updateAddressButton = document.createElement('input');
+        updateAddressButton.setAttribute('value', 'Update address');
+        updateAddressButton.setAttribute('type', 'submit');
+        updateAddressButton.setAttribute('class', 'field_helper');
+        $(this.geolocationAddressField).after(updateAddressButton);
+        $(updateAddressButton).click(function() {
+          _this.reverseGeocodeToAddressField();
+          return false;
+        });
+      }
+      $(this.geolocationAddressField).parent().addClass('map_value_address');
     }
 
     GoogleMapsPicker.prototype.latLngFromField = function() {
