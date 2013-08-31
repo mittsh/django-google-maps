@@ -50,9 +50,9 @@
     }
 
     GoogleMapsPicker.prototype.latLngFromField = function() {
-      var latLng, latitude, longitude, _ref;
+      var latitude, longitude, _ref;
       _ref = this.geolocationField.value.split(','), latitude = _ref[0], longitude = _ref[1];
-      return latLng = new google.maps.LatLng(latitude || 0, longitude || 0);
+      return new google.maps.LatLng(latitude || 0, longitude || 0);
     };
 
     GoogleMapsPicker.prototype.latLngToField = function(latLng) {
