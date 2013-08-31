@@ -4,17 +4,18 @@
 
   GoogleMapsPicker = (function() {
     function GoogleMapsPicker(mapCanvas) {
-      var enableClickToPick, isAddressFieldTruth, latLng,
+      var defaultMapZoom, enableClickToPick, isAddressFieldTruth, latLng,
         _this = this;
       this.mapCanvas = mapCanvas;
       this.geolocationField = document.getElementById(this.mapCanvas.getAttribute('data-field-id'));
       this.geolocationAddressField = document.getElementById(this.mapCanvas.getAttribute('data-address-field-id'));
       enableClickToPick = (this.mapCanvas.getAttribute('data-enable-click-to-pick')) === 'true';
       isAddressFieldTruth = false;
+      defaultMapZoom = parseInt((this.mapCanvas.getAttribute('data-default-map-zoom')) || 8);
       latLng = this.latLngFromField();
       this.map = new google.maps.Map(this.mapCanvas, {
         center: latLng,
-        zoom: 8,
+        zoom: defaultMapZoom,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       });
       this.marker = new google.maps.Marker({

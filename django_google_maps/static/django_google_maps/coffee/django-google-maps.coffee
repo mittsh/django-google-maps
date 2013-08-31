@@ -8,6 +8,7 @@ class GoogleMapsPicker
 		
 		enableClickToPick = (@mapCanvas.getAttribute 'data-enable-click-to-pick') == 'true'
 		isAddressFieldTruth = false
+		defaultMapZoom = parseInt (@mapCanvas.getAttribute 'data-default-map-zoom') or 8
 		
 		# Read the LatLng from input field
 		latLng = @latLngFromField()
@@ -15,7 +16,7 @@ class GoogleMapsPicker
 		# Initialize the Map
 		@map = new google.maps.Map this.mapCanvas,
 			center: latLng
-			zoom: 8
+			zoom: defaultMapZoom
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 		
 		# Initialize the draggable Marker

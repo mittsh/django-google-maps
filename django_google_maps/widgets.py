@@ -34,12 +34,14 @@ class GoogleMapsGeolocationWidget(widgets.TextInput):
 	
 	enable_address_field = False
 	enable_click_to_pick = False
+	default_map_zoom = 8
 	
 	class Media:
 		css = {'all': (settings.STATIC_URL + 'django_google_maps/css/django-google-maps.less.min.css',),}
 		js = (
 			'https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
-			'https://maps.googleapis.com/maps/api/js?sensor=false' + ('&key=' + settings.GOOGLE_MAPS_API_KEY if hasattr(settings, 'GOOGLE_MAPS_API_KEY') else ''),
+			'https://maps.googleapis.com/maps/api/js?sensor=false' +
+				('&key=' + settings.GOOGLE_MAPS_API_KEY if hasattr(settings, 'GOOGLE_MAPS_API_KEY') else ''),
 			settings.STATIC_URL + 'django_google_maps/src/site.js',
 		)
 
@@ -58,13 +60,14 @@ class GoogleMapsGeolocationWidget(widgets.TextInput):
 			'field_id': final_attrs['id'],
 			'enable_click_to_pick': str(self.enable_click_to_pick).lower(),
 			'address_field_id': final_attrs['id'] + '_address',
-			'address_field': ''
+			'address_field': '',
+			'default_map_zoom':self.default_map_zoom
 		}
 		
 		if self.enable_address_field:
 			kwargs['address_field'] = '<div class="map_value_address"><label>Address</label><input id="{address_field_id}" type="text" /></div>'.format(**kwargs)
 		
-		return mark_safe(u'<input{final_attrs} />{address_field}<div class="map_canvas_wrapper"><div id="map_canvas" class="map_canvas" data-field-id="{field_id}" data-enable-click-to-pick="{enable_click_to_pick}" data-address-field-id="{address_field_id}"></div></div>'.format(**kwargs))
+		return mark_safe(u'<input{final_attrs} />{address_field}<div class="map_canvas_wrapper"><div id="map_canvas" class="map_canvas" data-field-id="{field_id}" data-enable-click-to-pick="{enable_click_to_pick}" data-address-field-id="{address_field_id}" data-default-map-zoom="{default_map_zoom}"></div></div>'.format(**kwargs))
 
 
 
