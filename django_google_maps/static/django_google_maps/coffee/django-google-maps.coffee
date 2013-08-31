@@ -4,8 +4,10 @@ class GoogleMapsPicker
 		
 		@mapCanvas = mapCanvas
 		@geolocationField = document.getElementById @mapCanvas.getAttribute 'data-field-id'
-		@enableClickToPick = (@mapCanvas.getAttribute 'data-enable-click-to-pick') == 'true'
 		@geolocationAddressField = document.getElementById @mapCanvas.getAttribute 'data-address-field-id'
+		
+		enableClickToPick = (@mapCanvas.getAttribute 'data-enable-click-to-pick') == 'true'
+		isAddressFieldTruth = false
 		
 		# Read the LatLng from input field
 		latLng = @latLngFromField()
@@ -22,19 +24,21 @@ class GoogleMapsPicker
 			draggable: true,
 			position: latLng
 		
-		# Bind input field event 'focusout'
+		# Bind input field's event 'focusout'
 		$(@geolocationField).focusout () =>
 			latLng = @latLngFromField()
 			@map.setCenter latLng
 			@marker.setPosition latLng
+			@reverseGeocodeToAddressField()
 		
-		# If click-to-pick is enabled, bind Map 'click' event
-		if @enableClickToPick
+		# If click-to-pick is enabled, bind Map's 'click' event
+		if enableClickToPick
 			google.maps.event.addListener @map, 'click',  (event) =>
 				@marker.setPosition event.latLng
 				@latLngToField event.latLng
+				@reverseGeocodeToAddressField()
 		
-		# Bind marker 'drag' event
+		# Bind Marker's 'drag' event
 		google.maps.event.addListener @marker, 'drag',  (event) =>
 			@latLngToField event.latLng
 		
@@ -53,6 +57,14 @@ class GoogleMapsPicker
 				if event.which == 13 # return key code is 13
 					@geocodeFromAddressField()
 					false
+			
+			# Bind Marker's 'dragend' event
+			google.maps.event.addListener @marker, 'dragend', (event) =>
+				@reverseGeocodeToAddressField()
+		
+		# If address field is not truth, set it's value from reverse geocoding
+		if not isAddressFieldTruth
+			@reverseGeocodeToAddressField()
 
 	# Returns a LatLng object from the input field value
 	latLngFromField: () ->
@@ -73,9 +85,34 @@ class GoogleMapsPicker
 					@marker.setPosition latLng
 					@latLngToField latLng
 					@map.fitBounds results[0].geometry.viewport
+	
+	# Reverse-geocodes to the address field (if address field is provided)
+	reverseGeocodeToAddressField: () ->
+		if @geolocationAddressField
+			@geocoder.geocode
+				'latLng':@latLngFromField(),
+				(results, status) =>
+					if status == google.maps.GeocoderStatus.OK
+						@geolocationAddressField.value = results[0].formatted_address
 
 initializeGoogleMaps = () ->
 	$('.map_canvas').each (index) ->
 		picker = new GoogleMapsPicker @
 
 google.maps.event.addDomListener window, 'load', initializeGoogleMaps
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

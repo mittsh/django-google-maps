@@ -4,12 +4,13 @@
 
   GoogleMapsPicker = (function() {
     function GoogleMapsPicker(mapCanvas) {
-      var latLng,
+      var enableClickToPick, isAddressFieldTruth, latLng,
         _this = this;
       this.mapCanvas = mapCanvas;
       this.geolocationField = document.getElementById(this.mapCanvas.getAttribute('data-field-id'));
-      this.enableClickToPick = (this.mapCanvas.getAttribute('data-enable-click-to-pick')) === 'true';
       this.geolocationAddressField = document.getElementById(this.mapCanvas.getAttribute('data-address-field-id'));
+      enableClickToPick = (this.mapCanvas.getAttribute('data-enable-click-to-pick')) === 'true';
+      isAddressFieldTruth = false;
       latLng = this.latLngFromField();
       this.map = new google.maps.Map(this.mapCanvas, {
         center: latLng,
@@ -24,12 +25,14 @@
       $(this.geolocationField).focusout(function() {
         latLng = _this.latLngFromField();
         _this.map.setCenter(latLng);
-        return _this.marker.setPosition(latLng);
+        _this.marker.setPosition(latLng);
+        return _this.reverseGeocodeToAddressField();
       });
-      if (this.enableClickToPick) {
+      if (enableClickToPick) {
         google.maps.event.addListener(this.map, 'click', function(event) {
           _this.marker.setPosition(event.latLng);
-          return _this.latLngToField(event.latLng);
+          _this.latLngToField(event.latLng);
+          return _this.reverseGeocodeToAddressField();
         });
       }
       google.maps.event.addListener(this.marker, 'drag', function(event) {
@@ -46,6 +49,12 @@
             return false;
           }
         });
+        google.maps.event.addListener(this.marker, 'dragend', function(event) {
+          return _this.reverseGeocodeToAddressField();
+        });
+      }
+      if (!isAddressFieldTruth) {
+        this.reverseGeocodeToAddressField();
       }
     }
 
@@ -72,6 +81,19 @@
           return _this.map.fitBounds(results[0].geometry.viewport);
         }
       });
+    };
+
+    GoogleMapsPicker.prototype.reverseGeocodeToAddressField = function() {
+      var _this = this;
+      if (this.geolocationAddressField) {
+        return this.geocoder.geocode({
+          'latLng': this.latLngFromField()
+        }, function(results, status) {
+          if (status === google.maps.GeocoderStatus.OK) {
+            return _this.geolocationAddressField.value = results[0].formatted_address;
+          }
+        });
+      }
     };
 
     return GoogleMapsPicker;
