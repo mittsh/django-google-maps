@@ -135,7 +135,7 @@ class GeoLocationField(models.CharField):
 
 try:
 	from south.modelsinspector import add_introspection_rules
-	add_introspection_rules([], ["^django_google_maps\.fields\.GeoLocationField"])
-	add_introspection_rules([], ["^django_google_maps\.fields\.AddressField"])
+	add_introspection_rules([], ["^(django_google_maps\.)?django_google_maps\.fields\.GeoLocationField"])
+	add_introspection_rules([], ["^(django_google_maps\.)?django_google_maps\.fields\.AddressField"])
 except ImportError:
 	pass
